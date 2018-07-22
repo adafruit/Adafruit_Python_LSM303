@@ -81,9 +81,11 @@ class LSM303(object):
         # Convert to 12-bit values by shifting unused bits.
         accel = (accel[0] >> 4, accel[1] >> 4, accel[2] >> 4)
         # Read the magnetometer.
+        # Note that for some reason the LSM303 returns data in (X,Z,Y) order
         mag_raw = self._mag.readList(LSM303_REGISTER_MAG_OUT_X_H_M, 6)
-        mag = struct.unpack('>hhh', mag_raw)
-        return (accel, mag)
+        magX, magZ, magY = struct.unpack('>hhh', mag_raw)
+        reordered_mag = magX, magY, magZ
+        return (accel, reordered_mag)
 
     def set_mag_gain(gain=LSM303_MAGGAIN_1_3):
         """Set the magnetometer gain.  Gain should be one of the following
